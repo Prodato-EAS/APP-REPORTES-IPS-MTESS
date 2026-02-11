@@ -1,0 +1,17 @@
+.env
+__pycache__/
+*.pyc
+venv/
+.idea/
+.vscode/
+TEMP/
+*.xlsx
+# Scripts usados por Power Automate (no versionar)
+conciliacion.py
+almacenar_datos_ips.py
+almacenar_datos_reop.py
+enviar_reporte_y_fin.py
+informe_sharepoint.py
+monitor_captcha.py
+obtener_mes_anterior.py
+obtener_mes_limite_mora.py

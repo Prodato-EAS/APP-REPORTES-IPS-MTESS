@@ -1,0 +1,13 @@
+pandas
+msal
+requests
+openpyxl
+python-dotenv
+flask
+gunicorn
+flask-socketio
+gevent
+gevent-websocket
+Flask-Session
+reportlab
+pillow

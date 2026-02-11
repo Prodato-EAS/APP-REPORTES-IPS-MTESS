@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes IPS - MTESS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            font-size: 0.85rem;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 240px;
+            background: white;
+            border-right: 1px solid #dee2e6;
+            z-index: 1000;
+            transition: width 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Explicitly hide elements in collapsed mode */
+        .sidebar.collapsed .sidebar-header .logo-content,
+        .sidebar.collapsed .sidebar-header span,
+        .sidebar.collapsed .sidebar-header label,
+        .sidebar.collapsed .sidebar-header select,
+        .sidebar.collapsed .sidebar-controls,
+        .sidebar.collapsed .btn-text,
+        .sidebar.collapsed .nav-link span,
+        .sidebar.collapsed .user-details,
+        .sidebar.collapsed .user-profile .dropdown {
+            display: none !important;
+        }
+
+        /* Adjustments for collapsed state */
+        .sidebar.collapsed .sidebar-header {
+            padding: 1.5rem 0;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .sidebar.collapsed .btn-toggle {
+            margin: 0 auto;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.collapsed~.main-content {
+            margin-left: 70px;
+        }
+
+        /* Nav Links */
+        .nav-link {
+            color: #5a6169;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 14px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s ease, color 0.2s ease, border-radius 0.2s ease;
+        }
+
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 0;
+            width: 50px;
+            height: 50px;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex !important;
+        }
+
+        .sidebar.collapsed .nav-link i,
+        .sidebar.collapsed .nav-link svg {
+            margin-right: 0 !important;
+            width: 20px !important;
+            height: 20px !important;
+            stroke-width: 1.5 !important;
+        }
+
+        .nav-link:hover {
+            background-color: #e3e6e9;
+            color: #2d3748;
+            border-radius: 12px;
+        }
+
+        .nav-link.active {
+            background-color: #323232 !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            border-radius: 12px;
+        }
+
+        .nav-pills {
+            --bs-nav-pills-link-active-bg: #f0f0f0;
+            --bs-nav-pills-link-active-color: #3d3d3d;
+            --bs-nav-pills-border-radius: 14px;
+        }
+
+        /* User Profile */
+        .user-profile {
+            border-top: 1px solid #dee2e6;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            margin: 1rem;
+            border-radius: 16px;
+            border: 1px solid #e9ecef;
+        }
+
+        .sidebar.collapsed .user-profile {
+            padding: 10px 0;
+            margin: 5px;
+            background: transparent;
+            border: none;
+            justify-content: center !important;
+            display: flex !important;
+        }
+
+        .sidebar.collapsed .user-profile .user-avatar-sm,
+        .sidebar.collapsed .user-profile img {
+            margin-right: 0 !important;
+            width: 32px !important;
+            height: 32px !important;
+        }
+
+        /* Hide Toggle/Dropdown in Collapsed */
+        .sidebar.collapsed .dropdown-toggle,
+        .sidebar.collapsed .dropdown-menu,
+        .sidebar.collapsed .dropdown button {
+            display: none !important;
+        }
+
+        /* Expand mode*/
+        .user-profile .dropdown-menu {
+            top: auto !important;
+            bottom: 100% !important;
+            margin-bottom: 15px !important;
+            right: 0 !important;
+            left: 0 !important;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #eeeeee !important;
+            padding: 0.5rem;
+            transform-origin: bottom center;
+            animation: slideUpFade 0.2s ease-out;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-profile .dropdown-item {
+            border-radius: 8px;
+            font-weight: 500;
+            color: #444;
+            padding: 8px 12px;
+            transition: all 0.2s;
+        }
+
+        .user-profile .dropdown-item:hover {
+            background-color: #dde1e4;
+            color: #212529;
+        }
+
+        .dropdown-item:active {
+            background-color: #d5d8db !important;
+            color: inherit !important;
+        }
+
+        .user-avatar-sm {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-details {
+            line-height: 1.2;
+            overflow: hidden;
+        }
+
+        .user-name {
+            font-weight: 700;
+            color: #212529;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-org {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        /* Presence Header */
+        .presence-header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 240px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid #dee2e6;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            transition: left 0.3s ease;
+        }
+
+        .sidebar.collapsed~.main-content .presence-header {
+            left: 70px;
+        }
+
+        .main-content {
+            padding-top: 80px;
+        }
+
+        .avatar-stack {
+            display: flex;
+            flex-direction: row-reverse;
+        }
+
+        .avatar-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-left: -8px;
+            cursor: pointer;
+            transition: transform 0.2s, z-index 0.2s;
+            position: relative;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #495057;
+            object-fit: cover;
+        }
+
+        .avatar-circle:hover {
+            transform: translateY(-4px);
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Toast */
+        .toast-notification {
+            position: fixed;
+            top: 70px;
+            right: -300px;
+            /* Hidden */
+            background: white;
+            border-left: 4px solid #0d6efd;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 10px 15px;
+            border-radius: 4px;
+            z-index: 2000;
+            transition: right 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .toast-show {
+            right: 20px;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .card-stat {
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            transition: transform 0.3s, border-color 0.3s;
+            overflow: hidden;
+            background: white;
+        }
+
+        .card-stat:hover {
+            transform: translateY(-3px);
+            border-color: #dee2e6;
+        }
+
+        .card-stat .top-strip {
+            height: 0;
+            display: none;
+        }
+
+        .card-stat .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-stat .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .stat-icon.icon-total {
+            background: linear-gradient(135deg, #e3edf7 0%, #d0e1f0 100%);
+            color: #4a6fa5;
+        }
+
+        .stat-icon.icon-incons {
+            background: linear-gradient(135deg, #fce8e8 0%, #f8d4d4 100%);
+            color: #d9534f;
+        }
+
+        .stat-icon.icon-verif {
+            background: linear-gradient(135deg, #e6f4ea 0%, #d4edda 100%);
+            color: #4caf50;
+        }
+
+        .card-stat i.fs-1 {
+            display: none;
+        }
+
+        .card-stat .text-primary {
+            color: #4a6fa5 !important;
+        }
+
+        .card-stat .text-danger {
+            color: #d9534f !important;
+        }
+
+        .card-stat .text-success {
+            color: #4caf50 !important;
+        }
+
+        .table thead th {
+            background-color: #f1f3f5;
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.8rem;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.8rem;
+            padding: 0.5rem;
+            color: #000;
+        }
+
+        .badge-custom {
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: capitalize;
+            border: 1px solid transparent;
+        }
+
+        .bg-active {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .bg-inactive {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            display: none;
+        }
+
+        /* Search */
+        .search-container {
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s;
+        }
+
+        .search-container:focus-within {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+        }
+
+        .search-input {
+            border: none;
+            box-shadow: none !important;
+            font-size: 0.9rem;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .search-input:focus {
+            cursor: text;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            z-index: 1050;
+            background: white;
+            border-radius: 8px;
+            margin-top: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f0f0f0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .search-item {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            color: #495057;
+            border-bottom: 1px solid #f8f9fa;
+            transition: background-color 0.1s ease-in-out;
+        }
+
+        .search-item:hover {
+            background-color: #f8f9fa;
+            color: #292929;
+            cursor: pointer;
+        }
+
+        .pagination .page-link {
+            color: #495057;
+            background-color: transparent;
+            border: 1px solid #dee2e6;
+            margin: 0 2px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .pagination .page-link:hover {
+            color: #000;
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #495057;
+            border-color: #495057;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #adb5bd;
+            background-color: transparent;
+            border-color: #dee2e6;
+        }
+
+        .btn {
+            border-radius: 10px;
+        }
+
+        .btn-dark {
+            background-color: #2d3748;
+            border-color: #2d3748;
+        }
+
+        .btn-dark:hover {
+            background-color: #1a202c;
+            border-color: #1a202c;
+        }
+
+        .btn-primary {
+            background-color: #323232;
+            border-color: #323232;
+        }
+
+        .btn-primary:hover {
+            background-color: #414141;
+            border-color: #414141;
+        }
+
+        .btn-outline-secondary {
+            border-radius: 10px;
+        }
+
+        /* Action button colors */
+        .btn-verify {
+            background-color: #66bb6a;
+            border-color: #66bb6a;
+            color: white;
+        }
+
+        .btn-verify:hover {
+            background-color: #4caf50;
+            border-color: #4caf50;
+            color: white;
+        }
+
+        .btn-revert {
+            background-color: #ffb74d;
+            border-color: #ffb74d;
+            color: #5d4037;
+        }
+
+        .btn-revert:hover {
+            background-color: #ffa726;
+            border-color: #ffa726;
+            color: #5d4037;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loading" class="loading-overlay">
+        <div class="spinner-border text-primary" role="status"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-notification">
+        <div class="spinner-grow text-primary spinner-grow-sm" role="status"></div>
+        <span id="toastMsg">User Joined</span>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar shadow-sm" id="sidebar">
+        <div class="sidebar-header">
+            <div class="d-flex align-items-center overflow-hidden logo-content">
+                <i data-lucide="file-bar-chart" class="text-primary fs-4 me-2" stroke-width="1.7"></i>
+                <span class="fs-6 fw-bold text-dark text-truncate ms-2">Reportes</span>
+            </div>
+            <button class="btn btn-sm bg-light border-0 ms-auto btn-toggle" onclick="toggleSidebar()"
+                style="background-color: #e9ecef !important; padding: 0.5rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="menu" style="width: 16px; height: 16px;"></i>
+            </button>
+        </div>
+
+        <!-- Source Selector (Visible only when expanded) -->
+        <div class="px-3 mb-3 source-selector-container">
+            <label class="text-muted small mb-1 d-block fw-bold display-when-expanded">Fuente de Datos</label>
+            <div class="input-group search-container" style="background: white;">
+                <span class="input-group-text bg-transparent border-0 pe-2 text-muted"><i data-lucide="database"
+                        style="width: 16px; height: 16px;" stroke-width="1.8"></i></span>
+                <input type="text" class="form-control search-input bg-white text-dark fw-semibold" id="sourceDisplay"
+                    value="IPS" readonly style="cursor: pointer;" data-bs-toggle="dropdown" data-bs-display="static"
+                    aria-expanded="false">
+                <button
+                    class="btn btn-link text-secondary text-decoration-none border-0 px-3 border-start d-inline-flex align-items-center"
+                    type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                    <i data-lucide="chevron-down" style="width: 18px; height: 18px;" stroke-width="1.2"></i>
+                </button>
+                <ul class="dropdown-menu w-100 shadow-sm border-1 mt-1" style="border-radius: 8px;">
+                    <li><a class="dropdown-item py-2 d-flex align-items-center" href="#" onclick="changeSource('IPS')">
+                            <i data-lucide="file-text" class="me-2 text-muted" style="width: 16px; height: 16px;"
+                                stroke-width="1.5"></i>IPS
+                        </a></li>
+                    <li><a class="dropdown-item py-2 d-flex align-items-center" href="#"
+                            onclick="changeSource('MTESS')">
+                            <i data-lucide="file-text" class="me-2 text-muted" style="width: 16px; height: 16px;"
+                                stroke-width="1.5"></i>MTESS
+                        </a></li>
+                </ul>
+            </div>
+        </div>
+
+        <style>
+            .sidebar.collapsed .source-selector-container {
+                display: none !important;
+            }
+        </style>
+
+        <ul class="nav nav-pills flex-column mb-auto px-2">
+            <li class="nav-item">
+                <a href="#" class="nav-link active" onclick="switchView('general', this)">
+                    <i data-lucide="layout-grid" class="me-3" style="width: 15px; height: 15px;" stroke-width="1.8"></i>
+                    <span>Vista
+                        General</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="switchView('inconsistencies', this)">
+                    <i data-lucide="alert-circle" class="me-3" style="width: 15px; height: 15px;"
+                        stroke-width="1.8"></i>
+                    <span>Inconsistencias</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="switchView('verified', this)">
+                    <i data-lucide="check-circle-2" class="me-3" style="width: 15px; height: 15px;"
+                        stroke-width="1.8"></i>
+                    <span>Verificados</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- User Profile -->
+        <div class="mt-auto px-2 pb-2">
+            <div class="user-profile d-flex align-items-center justify-content-between position-relative">
+                <div class="d-flex align-items-center overflow-hidden">
+                    <img src="{{ photo if photo else 'https://via.placeholder.com/32' }}" alt="User"
+                        class="user-avatar-sm me-2">
+                    <div class="user-details">
+                        <div class="user-name">{{ user.get('name', 'Usuario') }}</div>
+                        <div class="user-org">Prodato</div>
+                    </div>
+                </div>
+                <div class="dropdown position-static">
+                    <!-- position-static to let menu align to parent .user-profile -->
+                    <button class="btn btn-sm btn-link text-muted p-0 border-0 d-inline-flex align-items-center"
+                        type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                        <i data-lucide="chevron-up" style="width: 18px; height: 18px;" stroke-width="1.2"></i>
+                    </button>
+                    <ul class="dropdown-menu shadow-sm border-0">
+                        {% if is_admin %}
+                        <li><a class="dropdown-item small d-inline-flex align-items-center"
+                                style="color: #5a6169 !important;" href="#" onclick="openUserModal()"><i
+                                    data-lucide="users" class="me-2" style="width: 14px; height: 14px;"
+                                    stroke-width="2.4"></i>Usuarios</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider" style="border-top-color: #eeeeee;">
+                        </li>
+                        {% endif %}
+                        <li><a class="dropdown-item small text-danger d-inline-flex align-items-center"
+                                href="/logout"><i data-lucide="log-out" class="me-2" style="width: 14px; height: 14px;"
+                                    stroke-width="2.4"></i>Cerrar
+                                Sesión</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="font-size: 10px; color: #aaa; text-align: center; margin-top: 8px;">v1.0.0</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Presence Header -->
+        <div class="presence-header shadow-sm">
+            <div class="d-flex align-items-center">
+                <span class="fw-bold fs-5 text-dark">Hola, {{ user.get('name', 'Usuario').split(' ')[0] }}</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <div class="avatar-stack" id="avatarStack">
+                    <!-- JS Render Avatars -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Header Controls -->
+        <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
+            <div>
+                <h4 id="pageTitle" class="fw-bold mb-1 text-dark">Vista General</h4>
+                <small class="text-muted" id="lastUpdated">Última actualización: --</small>
+            </div>
+            <div class="d-flex gap-2 pb-1">
+                <button class="btn btn-sm btn-success d-inline-flex align-items-center" onclick="exportExcel()"
+                    title="Exportar a Excel">
+                    <i data-lucide="file-spreadsheet" class="me-1" style="width: 16px; height: 16px;"></i> <span
+                        id="exportText">Exportar General</span>
+                </button>
+                <button id="pdfBtn" class="btn btn-sm btn-danger d-none d-inline-flex align-items-center"
+                    onclick="exportPDF()" title="Generar PDF">
+                    <i data-lucide="file-text" class="me-1" style="width: 16px; height: 16px;"></i> Generar
+                    PDF
+                </button>
+                <div class="vr"></div>
+                <button id="actionBtn" class="btn btn-sm btn-primary d-none" onclick="openConfirmationModal()">
+                    Action
+                </button>
+                <button class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center"
+                    onclick="fetchData(true)" title="Recargar Datos">
+                    <i data-lucide="refresh-cw" style="width: 16px; height: 16px;" stroke-width="1.4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Employee Search -->
+        <div class="row mb-4">
+            <div class="col-md-7">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-secondary border-0 d-inline-flex align-items-center"
+                        onclick="navStep(-1)" id="btnPrev" title="Anterior" disabled>
+                        <i data-lucide="chevron-left" style="width: 20px; height: 20px;" stroke-width="1.3"></i>
+                    </button>
+                    <div class="flex-grow-1 position-relative">
+                        <div class="input-group search-container" id="companySearchContainer">
+                            <span class="input-group-text bg-transparent border-0 pe-2"><i data-lucide="search"
+                                    class="text-muted" style="width: 18px; height: 18px;" stroke-width="1.5"></i></span>
+                            <input type="text" id="companySearch" class="form-control search-input"
+                                placeholder="Buscar o seleccionar empresa..." autocomplete="off">
+                            <button class="btn btn-link text-muted text-decoration-none border-0 px-2" type="button"
+                                onclick="clearSearch()" id="clearSearchBtn" style="display:none;"><i data-lucide="x"
+                                    style="width: 16px; height: 16px;"></i></button>
+                            <button class="btn btn-link text-secondary text-decoration-none border-0 px-3 border-start"
+                                type="button" onclick="toggleSearchDropdown()"><i data-lucide="chevron-down"
+                                    style="width: 18px; height: 18px;" stroke-width="1.2"></i></button>
+                        </div>
+                        <div id="searchResults" class="search-results shadow-sm d-none"></div>
+                    </div>
+                    <button class="btn btn-outline-secondary border-0 d-inline-flex align-items-center"
+                        onclick="navStep(1)" id="btnNext" title="Siguiente" disabled>
+                        <i data-lucide="chevron-right" style="width: 20px; height: 20px;" stroke-width="1.3"></i>
+                    </button>
+                    <div class="bg-light rounded border px-3 py-2 ms-2 text-muted fw-bold small" id="navInfo"
+                        style="white-space: nowrap;">-- de --</div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group search-container">
+                    <span class="input-group-text bg-transparent border-0 pe-2"><i data-lucide="user" class="text-muted"
+                            style="width: 18px; height: 18px;" stroke-width="1.5"></i></span>
+                    <input type="text" id="empSearch" class="form-control search-input"
+                        placeholder="Buscar empleado (Nombre o Cédula)..." autocomplete="off">
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card card-stat">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon icon-total">
+                                <i data-lucide="clipboard-list" stroke-width="1.5"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Total
+                                    Registros</small>
+                                <h3 class="fw-bold mb-0 mt-1" id="statTotal">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-stat">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon icon-incons">
+                                <i data-lucide="alert-circle" stroke-width="1.5"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase"
+                                    style="font-size: 0.7rem;">Inconsistencias</small>
+                                <h3 class="fw-bold mb-0 mt-1" id="statIncons">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-stat">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon icon-verif">
+                                <i data-lucide="check-circle-2" stroke-width="1.5"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase"
+                                    style="font-size: 0.7rem;">Verificados</small>
+                                <h3 class="fw-bold mb-0 mt-1" id="statVerif">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Controls -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center">
+                <span class="text-muted small me-2">Mostrar:</span>
+                <div class="dropdown d-inline-block">
+                    <div class="input-group search-container" style="background: white; width: 70px;">
+                        <input type="text" class="form-control search-input bg-white text-dark fw-bold text-center p-1"
+                            id="rowsPerPageLabel" value="25" readonly
+                            style="cursor: pointer; height: 31px; font-size: 0.85rem;" data-bs-toggle="dropdown"
+                            data-bs-display="static" aria-expanded="false">
+                        <button class="btn btn-link text-secondary text-decoration-none border-0 px-2 border-start py-0"
+                            type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"
+                            style="height: 31px;">
+                            <i data-lucide="chevron-down" style="width: 16px; height: 16px;" stroke-width="1.2"></i>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm border-0 mt-1" style="min-width: 100%;">
+                            <li><a class="dropdown-item text-center" href="#" onclick="changeItemsPerPage(25)">25</a>
+                            </li>
+                            <li><a class="dropdown-item text-center" href="#" onclick="changeItemsPerPage(50)">50</a>
+                            </li>
+                            <li><a class="dropdown-item text-center" href="#" onclick="changeItemsPerPage(100)">100</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center" width="40"><input type="checkbox" id="selectAll"
+                                    class="form-check-input" onclick="toggleSelectAll()"></th>
+                            <th class="text-center" width="50">N°</th>
+                            <th>Empresa</th>
+                            <th>Patronal IPS</th>
+                            <th>Patronal MTESS</th>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th class="revisado-col d-none">Estado</th>
+                            <th class="modified-col d-none text-center border-end">Modificado Por</th>
+                            <th class="border-start">Estado IPS</th>
+                            <th>Estado MTESS</th>
+                            <th class="bg-light border-start border-end text-center">Aud. Estado</th>
+                            <th>Entrada IPS</th>
+                            <th>Entrada MTESS</th>
+                            <th class="bg-light border-start border-end text-center">Aud. Entrada</th>
+                            <th>Salida IPS</th>
+                            <th>Salida MTESS</th>
+                            <th class="bg-light border-start text-center">Aud. Salida</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+            <div id="pagination" class="d-flex justify-content-center py-3 d-none border-top">
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="paginationList"></ul>
+                </nav>
+            </div>
+            <div id="noData" class="text-center py-5 text-muted d-none">
+                <i data-lucide="inbox" class="fs-1 mb-3 d-block opacity-50"
+                    style="width: 32px; height: 32px; margin: 0 auto;"></i><span class="small">No hay registros para
+                    mostrar.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalTitle">Confirmar Acción</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <p class="text-muted mb-0" id="modalMessage">¿Está seguro?</p>
+                    <div id="processingProgress" class="d-none mt-3">
+                        <div class="progress" style="height: 20px;">
+                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar" style="width: 0%">0%</div>
+                        </div>
+                        <small class="text-muted mt-1 d-block text-center" id="progressText">Iniciando...</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal"
+                        id="modalCancelBtn">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="modalConfirmBtn"
+                        onclick="executeBatch()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management Modal -->
+    <div class="modal fade" id="userManagementModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Administrar Usuarios</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <!-- Add User Form -->
+                    <div class="input-group mb-3">
+                        <input type="email" id="newUserEmail" class="form-control" placeholder="usuario@prodato.com.py">
+                        <button class="btn btn-primary" type="button" onclick="addUser()">Agregar</button>
+                    </div>
+                    <small class="text-muted d-block mb-3">* Solo correos @prodato.com.py</small>
+
+                    <!-- Users List -->
+                    <div class="list-group list-group-flush border rounded" id="userList"
+                        style="max-height: 300px; overflow-y: auto;">
+                        <div class="text-center p-3 text-muted">Cargando...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        let fullData = [];
+        let currentView = 'general';
+        let companyFilter = 'Todas';
+        let currentSource = 'IPS'; // Default Source
+        let pendingAction = null;
+        let currentVersion = 0;
+        const socket = io();
+
+        let currentPage = 1;
+        let itemsPerPage = 25;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData(true);
+            setupSearchClicks();
+            setupEmpSearch();
+
+            // Sockets
+            socket.on('connect', () => console.log("Conectado a Servidor Real-Time"));
+
+            socket.on('server_update', (data) => {
+                if (data.source && data.source !== currentSource) return;
+
+                if (data.version !== currentVersion) {
+                    currentVersion = data.version;
+                    const hasSelection = document.querySelectorAll('.row-check:checked').length > 0;
+                    const modalOpen = document.getElementById('confirmationModal').classList.contains('show');
+                    if (!hasSelection && !modalOpen) fetchData(false, true);
+                }
+            });
+
+            // Presence Events
+            socket.on('user_joined', (user) => {
+                showToast(`${user.name} se ha conectado`);
+                updateAvatarList([user], true);
+            });
+
+            socket.on('presence_list', (users) => {
+                updateAvatarList(users);
+            });
+
+            socket.on('presence_update', (users) => {
+                updateAvatarList(users);
+            });
+
+            socket.on('user_left', (user) => {
+                showToast(`${user.name} se ha desconectado`);
+            });
+
+            lucide.createIcons();
+        });
+
+        function initIcons() {
+            lucide.createIcons();
+        }
+
+        // Presence Logic
+        let currentUsers = [];
+
+        function updateAvatarList(users, append = false) {
+            const stack = document.getElementById('avatarStack');
+            const myEmail = "{{ user.get('preferred_username') }}";
+
+            if (!append) {
+                currentUsers = users.filter(u => u.email !== myEmail);
+                stack.innerHTML = '';
+            } else {
+                users.forEach(u => {
+                    if (u.email !== myEmail && !currentUsers.find(cu => cu.email === u.email)) {
+                        currentUsers.push(u);
+                    }
+                });
+                stack.innerHTML = '';
+            }
+
+            currentUsers.forEach(u => {
+                const img = document.createElement('img');
+                img.src = u.photo || createInitialsAvatar(u.name);
+                img.className = 'avatar-circle shadow-sm';
+                const tooltipText = `${u.name} está revisando este reporte`;
+                img.title = tooltipText;
+
+                img.setAttribute('data-bs-toggle', 'tooltip');
+                img.setAttribute('data-bs-placement', 'bottom');
+                stack.appendChild(img);
+            });
+
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        function createInitialsAvatar(name) {
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            const m = document.getElementById('toastMsg');
+            m.textContent = msg;
+            t.classList.add('toast-show');
+            setTimeout(() => {
+                t.classList.remove('toast-show');
+            }, 4000);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        function changeItemsPerPage(val) {
+            itemsPerPage = parseInt(val);
+            currentPage = 1;
+            const lbl = document.getElementById('rowsPerPageLabel');
+            if (lbl) lbl.value = val;
+            renderView();
+        }
+
+        function exportExcel() {
+            let url = `/api/export?source=${currentSource}`;
+            if (companyFilter && companyFilter !== 'Todas') {
+                url += `&company=${encodeURIComponent(companyFilter)}`;
+            }
+            window.location.href = url;
+        }
+
+        function exportPDF() {
+            if (!companyFilter || companyFilter === 'Todas') {
+                alert('Por favor seleccione una empresa específica para generar el PDF.');
+                return;
+            }
+
+            let url = `/api/export/pdf?source=${currentSource}&company=${encodeURIComponent(companyFilter)}`;
+            window.open(url, '_blank');
+        }
+
+        async function fetchData(forceRefesh = false, silent = false) {
+            if (!silent) document.getElementById('loading').style.display = 'flex';
+            try {
+                const res = await fetch(`/api/data?refresh=${forceRefesh}&source=${currentSource}&_=${new Date().getTime()}`);
+                const response = await res.json();
+
+                if (response.error === "Unauthorized") {
+                    window.location.href = "/login";
+                    return;
+                }
+
+                fullData = response.data || [];
+                const lastUpdated = response.last_updated || "Desconocido";
+
+                document.getElementById('lastUpdated').textContent = `Última actualización: ${lastUpdated} (${currentSource})`;
+
+                const rucMap = new Map();
+                fullData.forEach(item => {
+                    const ruc = item.RUC || "SIN_RUC";
+                    if (!rucMap.has(ruc)) { rucMap.set(ruc, item.Empresa || "Sin Nombre"); }
+                });
+                companyList = Array.from(rucMap.entries()).map(([ruc, name]) => ({ ruc, name })).sort((a, b) => a.name.localeCompare(b.name));
+                updateNavInfo();
+                populateCompanySearch();
+                renderView();
+            } catch (err) { console.error(err); alert("Error cargando datos: " + err); }
+            finally { document.getElementById('loading').style.display = 'none'; }
+        }
+
+        function populateCompanySearch() {
+            // Logic moved from fetchData to standalone if needed, or just let fetchData do it
+            // Current logic inside fetchData builds companyList.
+            // Done in changeSource.
+        }
+
+
+        function changeSource(newSource) {
+            if (newSource === currentSource) return;
+            currentSource = newSource;
+
+            const labelMap = { 'IPS': 'IPS', 'MTESS': 'MTESS' };
+            const display = document.getElementById('sourceDisplay');
+            if (display) display.value = labelMap[newSource] || newSource;
+
+            currentPage = 1;
+            companyFilter = 'Todas';
+            document.getElementById('companySearch').value = '';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            document.getElementById('empSearch').value = '';
+            fetchData(true);
+        }
+
+        function navStep(step) {
+            if (companyList.length === 0) return;
+            let currentIndex = -1;
+            if (companyFilter !== 'Todas') { currentIndex = companyList.findIndex(c => c.ruc == companyFilter); }
+            let nextIndex = currentIndex + step;
+            if (nextIndex < 0) nextIndex = 0;
+            if (nextIndex >= companyList.length) nextIndex = companyList.length - 1;
+            const nextCompany = companyList[nextIndex];
+            if (nextCompany) selectCompany(nextCompany.ruc, nextCompany.name);
+        }
+
+        function updateNavInfo() {
+            const info = document.getElementById('navInfo');
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+            if (companyList.length === 0 || companyFilter === 'Todas') {
+                info.textContent = `Total Empresas: ${companyList.length}`;
+                btnPrev.disabled = true;
+                btnNext.disabled = companyList.length === 0;
+                if (companyFilter === 'Todas') { btnPrev.disabled = true; return; }
+            }
+            const currentIndex = companyList.findIndex(c => c.ruc == companyFilter);
+            if (currentIndex === -1) {
+                info.textContent = `Total Empresas: ${companyList.length}`;
+                btnPrev.disabled = true;
+                btnNext.disabled = false;
+                return;
+            }
+            info.textContent = `Empresa ${currentIndex + 1} de ${companyList.length}`;
+            btnPrev.disabled = currentIndex <= 0;
+            btnNext.disabled = currentIndex >= companyList.length - 1;
+        }
+
+        function switchView(view, el) {
+            currentView = view;
+            currentPage = 1;
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            if (el) el.classList.add('active');
+            renderView();
+        }
+
+        function toTitleCase(str) { return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); }
+        function changePage(page) { currentPage = page; renderView(); }
+
+        function setupSearchClicks() {
+            document.addEventListener('click', (e) => {
+                const container = document.getElementById('companySearchContainer');
+                const results = document.getElementById('searchResults');
+                if (container && !container.contains(e.target) && results && !results.contains(e.target)) results.classList.add('d-none');
+            });
+            document.getElementById('companySearch').addEventListener('input', (e) => filterSearch(e.target.value));
+            document.getElementById('companySearch').addEventListener('focus', (e) => { if (e.target.value) filterSearch(e.target.value); });
+        }
+        function setupEmpSearch() {
+            document.getElementById('empSearch').addEventListener('input', () => { currentPage = 1; renderView(); });
+        }
+        function toggleSearchDropdown() {
+            const results = document.getElementById('searchResults');
+            const input = document.getElementById('companySearch');
+            if (results.classList.contains('d-none')) { filterSearch(input.value, true); input.focus(); } else { results.classList.add('d-none'); }
+        }
+        function filterSearch(val, showAllIfEmpty = false) {
+            val = (val || "").toLowerCase();
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const results = document.getElementById('searchResults');
+            clearBtn.style.display = val ? 'block' : 'none';
+            let matches = [];
+            if (!val && !showAllIfEmpty) {
+                results.classList.add('d-none'); companyFilter = 'Todas'; renderView(); updateNavInfo(); return;
+            } else if (!val && showAllIfEmpty) { matches = companyList; }
+            else { matches = companyList.filter(c => c.name.toLowerCase().includes(val)); }
+            results.innerHTML = '';
+            if (matches.length > 0) {
+                matches.forEach(c => {
+                    const div = document.createElement('div'); div.className = 'search-item'; div.textContent = c.name;
+                    div.onclick = () => selectCompany(c.ruc, c.name); results.appendChild(div);
+                });
+                results.classList.remove('d-none');
+            } else {
+                results.innerHTML = '<div class="p-3 text-muted small text-center">No se encontraron resultados</div>'; results.classList.remove('d-none');
+            }
+        }
+        function selectCompany(ruc, name) {
+            const input = document.getElementById('companySearch'); input.value = name; companyFilter = ruc;
+            document.getElementById('searchResults').classList.add('d-none'); document.getElementById('clearSearchBtn').style.display = 'block';
+            currentPage = 1; renderView(); updateNavInfo();
+            initIcons();
+        }
+        function clearSearch() {
+            const input = document.getElementById('companySearch'); input.value = ''; companyFilter = 'Todas';
+            document.getElementById('clearSearchBtn').style.display = 'none'; currentPage = 1; renderView(); updateNavInfo();
+            initIcons();
+        }
+
+        function renderView() {
+            let filtered = fullData;
+            if (companyFilter !== 'Todas') { filtered = filtered.filter(item => (item.RUC || "SIN_RUC") == companyFilter); }
+
+            const empTerm = document.getElementById('empSearch').value.trim().toLowerCase();
+            if (empTerm) {
+                filtered = filtered.filter(item => {
+                    const name = (item.Nombre || "").toLowerCase();
+                    const cedula = String(item.Cedula || "");
+                    return name.includes(empTerm) || cedula.includes(empTerm);
+                });
+            }
+
+            let exportName = 'General';
+            if (companyFilter !== 'Todas') { const found = companyList.find(c => c.ruc == companyFilter); exportName = found ? found.name : 'Selección'; }
+            document.getElementById('exportText').textContent = `Exportar ${exportName}`;
+
+            // Show/hide PDF button
+            const pdfBtn = document.getElementById('pdfBtn');
+            if (companyFilter !== 'Todas') {
+                pdfBtn.classList.remove('d-none');
+            } else {
+                pdfBtn.classList.add('d-none');
+            }
+
+            const countIncons = filtered.filter(item => isInconsistent(item) && item.REVISADO !== 'REVISADO').length;
+            const countVerif = filtered.filter(item => item.REVISADO === 'REVISADO').length;
+            document.getElementById('statTotal').textContent = filtered.length.toLocaleString();
+            document.getElementById('statIncons').textContent = countIncons.toLocaleString();
+            document.getElementById('statVerif').textContent = countVerif.toLocaleString();
+
+            const title = document.getElementById('pageTitle');
+            const actionBtn = document.getElementById('actionBtn');
+            const checkHeader = document.querySelector('th input[type="checkbox"]');
+
+            const showRevisado = currentView !== 'general';
+            document.querySelectorAll('.revisado-col').forEach(el => el.classList.toggle('d-none', !showRevisado));
+            const showModified = (currentView === 'inconsistencies' || currentView === 'verified');
+            document.querySelectorAll('.modified-col').forEach(el => el.classList.toggle('d-none', !showModified));
+
+            if (currentView === 'inconsistencies') {
+                title.textContent = 'Inconsistencias Detectadas';
+                filtered = filtered.filter(item => isInconsistent(item) && item.REVISADO !== 'REVISADO');
+                actionBtn.textContent = 'Verificar Seleccionados'; actionBtn.className = 'btn btn-sm btn-dark'; actionBtn.classList.remove('d-none');
+                checkHeader.disabled = false; pendingAction = 'REVISADO';
+            } else if (currentView === 'verified') {
+                title.textContent = 'Registros Verificados';
+                filtered = filtered.filter(item => item.REVISADO === 'REVISADO');
+                actionBtn.textContent = 'Revertir a Pendiente'; actionBtn.className = 'btn btn-sm btn-dark'; actionBtn.classList.remove('d-none');
+                checkHeader.disabled = false; pendingAction = 'PENDIENTE';
+            } else {
+                title.textContent = 'Vista General'; actionBtn.classList.add('d-none'); checkHeader.disabled = true;
+            }
+
+            const totalItems = filtered.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pagedData = filtered.slice(start, end);
+
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
+            document.getElementById('selectAll').checked = false;
+
+            if (pagedData.length === 0) {
+                document.getElementById('noData').classList.remove('d-none'); document.getElementById('pagination').classList.add('d-none');
+            } else {
+                document.getElementById('noData').classList.add('d-none');
+                if (totalPages > 1) { document.getElementById('pagination').classList.remove('d-none'); renderPagination(totalPages); }
+                else { document.getElementById('pagination').classList.add('d-none'); }
+            }
+
+            pagedData.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                const stateBadge = (val) => {
+                    const v = (val || "").toUpperCase();
+                    if (v.includes("INACTIVO")) return `<span class="badge-custom bg-inactive">${toTitleCase(val)}</span>`;
+                    if (v.includes("ACTIVO")) return `<span class="badge-custom bg-active">${toTitleCase(val)}</span>`;
+                    return val ? `<span class="text-muted small">${val}</span>` : "";
+                };
+                const audBadge = (val) => {
+                    const v = (val || "").toUpperCase();
+                    if (v === "NO_COINCIDE") return `<span class="badge rounded-pill bg-danger">No Coincide</span>`;
+                    if (v.includes("SIN_REGISTRO")) {
+                        const niceLabel = v.replace(/_/g, " ").replace("SIN REGISTRO", "Sin Registro");
+                        return `<span class="badge rounded-pill bg-danger">${niceLabel}</span>`;
+                    }
+                    if (v === "COINCIDE") return `<span class="badge rounded-pill text-success border border-success">Coincide</span>`;
+                    if (v === "VIGENTE") return `<span class="badge rounded-pill text-primary border border-primary">Vigente</span>`;
+                    return v;
+                };
+                const revisadoContent = showRevisado ? `<td><span class="badge bg-secondary">${row.REVISADO || 'PENDIENTE'}</span></td>` : '';
+                const modifiedContent = showModified ? `<td class="text-center border-end"><span class="badge bg-light text-secondary border">${row.ModificadoPor || 'Sistema'}</span></td>` : '';
+
+                tr.innerHTML = `
+                    <td class="text-center">${currentView !== 'general' ? `<input type="checkbox" class="row-check form-check-input" value="${row.ID}">` : ''}</td>
+                    <td class="text-center font-monospace text-muted fw-bold">${start + index + 1}</td>
+                    <td class="fw-semibold text-truncate" style="max-width: 150px;" title="${row.Empresa}">${row.Empresa || ''}</td>
+                    <td>${row.Patronal_IPS || '-'}</td>
+                    <td>${row.Patronal_REOP || '-'}</td>
+                    <td>${row.Cedula || ''}</td>
+                    <td class="text-truncate" style="max-width: 140px;" title="${row.Nombre}">${row.Nombre || ''}</td>
+                    ${revisadoContent}
+                    ${modifiedContent}
+                    <td class="border-start">${stateBadge(row.Estado_IPS)}</td>
+                    <td>${stateBadge(row.Estado_MTESS)}</td>
+                    <td class="bg-light text-center border-start border-end">${audBadge(row.AUD_ESTADO)}</td>
+                    <td class="small">${row.Entrada_IPS || ''}</td>
+                    <td class="small">${row.Entrada_MTESS || ''}</td>
+                    <td class="bg-light text-center border-start border-end">${audBadge(row.AUD_ENTRADA)}</td>
+                    <td class="small">${row.Salida_IPS || ''}</td>
+                    <td class="small">${row.Salida_MTESS || ''}</td>
+                    <td class="bg-light text-center border-start">${audBadge(row.AUD_SALIDA)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            initIcons();
+        }
+
+        function renderPagination(totalPages) {
+            const list = document.getElementById('paginationList'); list.innerHTML = '';
+            const prevLi = document.createElement('li'); prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link d-inline-flex align-items-center" href="#" onclick="changePage(${currentPage - 1})"><i data-lucide="chevron-left" style="width: 20px; height: 20px;" stroke-width="1.4"></i></a>`; list.appendChild(prevLi);
+
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+            if (startPage <= 2) endPage = Math.min(5, totalPages);
+            if (endPage >= totalPages - 1) startPage = Math.max(1, totalPages - 4);
+
+            if (startPage > 1) { list.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(1)">1</a></li>`; if (startPage > 2) list.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`; }
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li'); li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`; list.appendChild(li);
+            }
+            if (endPage < totalPages) { if (endPage < totalPages - 1) list.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`; list.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a></li>`; }
+
+            const nextLi = document.createElement('li'); nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link d-inline-flex align-items-center" href="#" onclick="changePage(${currentPage + 1})"><i data-lucide="chevron-right" style="width: 20px; height: 20px;" stroke-width="1.4"></i></a>`; list.appendChild(nextLi);
+        }
+
+        function isInconsistent(row) {
+            const badStates = ['NO_COINCIDE', 'SIN_REGISTRO_IPS', 'SIN_REGISTRO_MTESS'];
+
+            return (
+                badStates.includes(row.AUD_ENTRADA) ||
+                badStates.includes(row.AUD_ESTADO) ||
+                badStates.includes(row.AUD_SALIDA)
+            );
+        }
+
+        async function executeBatch() {
+            const selected = Array.from(document.querySelectorAll('.row-check:checked')).map(cb => cb.value);
+            if (selected.length === 0) return;
+
+            const btn = document.getElementById('modalConfirmBtn');
+            const cancelBtn = document.getElementById('modalCancelBtn');
+            const progressContainer = document.getElementById('processingProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+
+            // Setup UI for processing
+            btn.classList.add('d-none');
+            cancelBtn.disabled = true;
+            progressContainer.classList.remove('d-none');
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+
+            let processedCount = 0;
+            const total = selected.length;
+            let errors = 0;
+            const batchSize = 1;
+
+            try {
+                for (let i = 0; i < total; i += batchSize) {
+                    const batch = selected.slice(i, i + batchSize);
+
+                    try {
+                        const res = await fetch('/api/update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ids: batch, status: pendingAction, source: currentSource })
+                        });
+                        const result = await res.json();
+
+                        if (result.result !== 'success') {
+                            errors += batch.length;
+                            console.error("Batch error:", result.message);
+                        }
+                    } catch (err) {
+                        console.error("Network/Server error during batch:", err);
+                        errors += batch.length;
+                    }
+
+                    // Update Progress
+                    processedCount += batch.length;
+                    const percent = Math.round((processedCount / total) * 100);
+                    progressBar.style.width = `${percent}%`;
+                    progressBar.textContent = `${percent}%`;
+                    progressText.textContent = `Procesando ${processedCount} de ${total} registros...`;
+                }
+
+                // Finalize
+                progressText.textContent = errors > 0
+                    ? `Finalizado con ${errors} errores.`
+                    : "¡Proceso Completado Exitosamente!";
+
+                progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                progressBar.classList.add('bg-success');
+
+                await new Promise(r => setTimeout(r, 1000));
+
+                bootstrap.Modal.getInstance(document.getElementById('confirmationModal')).hide();
+                fetchData(true, false);
+
+            } catch (err) {
+                console.error("Fatal execution error:", err);
+                alert("Error crítico durante la ejecución: " + err);
+            } finally {
+                setTimeout(() => {
+                    btn.classList.remove('d-none');
+                    cancelBtn.disabled = false;
+                    progressContainer.classList.add('d-none');
+                    progressBar.style.width = '0%';
+                    progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+                    progressBar.classList.remove('bg-success');
+                }, 500);
+            }
+        }
+
+        // --- Admin Functions ---
+        function openUserModal() {
+            new bootstrap.Modal(document.getElementById('userManagementModal')).show();
+            fetchUsers();
+        }
+
+        async function fetchUsers() {
+            const list = document.getElementById('userList');
+            list.innerHTML = '<div class="text-center p-3 text-muted"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Cargando...</div>';
+
+            try {
+                const res = await fetch('/api/admin/users');
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    renderUserList(data.users);
+                } else {
+                    list.innerHTML = `<div class="text-center p-3 text-danger">Error: ${data.message}</div>`;
+                }
+            } catch (e) {
+                list.innerHTML = `<div class="text-center p-3 text-danger">Error de conexión</div>`;
+            }
+        }
+
+        function renderUserList(users) {
+            const list = document.getElementById('userList');
+            list.innerHTML = '';
+
+            if (users.length === 0) {
+                list.innerHTML = `<div class="text-center p-3 text-muted">No hay usuarios en la lista.</div>`;
+                return;
+            }
+
+            users.sort((a, b) => a.email.localeCompare(b.email));
+
+            users.forEach(u => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item d-flex justify-content-between align-items-center';
+                // Highlight admin
+                const isAdmin = u.email === "jonathan.arce@prodato.com.py";
+                const badge = isAdmin ? '<span class="badge bg-primary rounded-pill me-2">Admin</span>' : '';
+                const deleteBtn = isAdmin ? '' : `<button class="btn btn-sm btn-outline-danger border-0" onclick="deleteUser('${u.id}', '${u.email}')"><i data-lucide="trash-2" style="width: 16px; height: 16px;"></i></button>`;
+
+                item.innerHTML = `
+                    <div class="text-truncate">
+                        ${badge}
+                        <span class="${isAdmin ? 'fw-bold' : ''}">${u.email}</span>
+                    </div>
+                    ${deleteBtn}
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        async function addUser() {
+            const input = document.getElementById('newUserEmail');
+            const email = input.value.trim();
+            if (!email) return;
+
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            try {
+                const res = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    input.value = '';
+                    fetchUsers();
+                } else {
+                    alert(data.message);
+                }
+            } catch (e) {
+                alert("Error de conexión");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        async function deleteUser(id, email) {
+            if (!confirm(`¿Eliminar acceso a ${email}?`)) return;
+
+            try {
+                const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    fetchUsers();
+                } else {
+                    alert(data.message);
+                }
+            } catch (e) {
+                alert("Error de conexión");
+            }
+        }
+
+        function openConfirmationModal() {
+            const selected = document.querySelectorAll('.row-check:checked').length;
+            if (selected === 0) return;
+            document.getElementById('modalMessage').textContent = `¿Confirma cambiar el estado de ${selected} registros a "${pendingAction}"?`;
+            document.getElementById('processingProgress').classList.add('d-none');
+            document.getElementById('modalConfirmBtn').classList.remove('d-none');
+            document.getElementById('modalCancelBtn').disabled = false;
+
+            new bootstrap.Modal(document.getElementById('confirmationModal')).show();
+        }
+        function toggleSelectAll() {
+            const checked = document.getElementById('selectAll').checked;
+            document.querySelectorAll('.row-check').forEach(cb => cb.checked = checked);
+        }
+    </script>
+</body>
+
+</html>
